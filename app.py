@@ -18,47 +18,35 @@ from pathlib import Path
 #from llama_index import download_loader, GPTSimpleVectorIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper
 from llama_index import download_loader, GPTVectorStoreIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper
 
-api_key = ""
-
 def main():
-    st.sidebar.title("Dashboard")  # Add title to the sidebar
+    st.sidebar.title("Dashboard Playground")  # Add title to the sidebar
 
     st.title("Generative AI ChatBots")
 
     st.sidebar.text("Enter your OpenAI API key to start")  # Add title to the sidebar   
 
-    openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")  # Add OpenAI API Key input field
+    openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")  # Add OpenAI API Key input field    
 
-    if st.sidebar.button("Start"):
-        global api_key
-        api_key = openai_api_key
-        #os.environ["OPENAI_API_KEY"] = openai_api_key  # Set the OpenAI API key in the environment variable
+    openai.api_key = openai_api_key     
 
     # Create a sidebar menu
-    page = st.sidebar.selectbox("Select a page", ["Chat Support (LangChain)", "Chat Support (LlamaIndex)", "Chat PDF", "Chat MLS"])
-
-    
-   
+    page = st.sidebar.selectbox("Select a page", ["Chat Support (LangChain)", "Chat Support (LlamaIndex)", "Chat PDF", "Chat MLS"])     
 
     st.sidebar.title("Bradford Technologies")  # Add title to the sidebar    
     st.sidebar.text("Developed by Jeferson Tobias")  # Add title to the sidebar    
 
     if page == "Chat Support (LangChain)":
-        pageSupport()
+        pageSupport( openai_api_key )
     elif page == "Chat Support (LlamaIndex)":
-        pageSupport2()    
+        pageSupport2( openai_api_key )    
     elif page == "Chat PDF":
-        pagePDF()
+        pagePDF( openai_api_key )
     elif page == "Chat MLS":
-        pageMLS()
+        pageMLS( openai_api_key )
 
 
-def pageSupport():
-    #st.header("Chat Support")
-    #st.write("Welcome to Support!")
-
-    #load_dotenv()
-
+def pageSupport( api_key ):
+    
     #if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
     if api_key is None or api_key == "":
         st.error("OPENAI_API_KEY is not set")
@@ -124,13 +112,8 @@ def pageSupport():
             else:
                 st.warning("Please load the URL content first.")
 
-def pageSupport2():
-    #st.header("Chat Support LlamaIndex")
-    #st.write("Welcome to Support 2!")
-
-    #load_dotenv()
-    #openai_api_key = os.getenv("OPENAI_API_KEY")
-
+def pageSupport2( api_key ):
+    
     if api_key is None or api_key == "":
         st.error("OPENAI_API_KEY is not set")
         return
@@ -138,7 +121,9 @@ def pageSupport2():
     st.title("💬 Chat Support (LlamaIndex)")
     st.write("Scraper - BeautifulSoup")
 
-    def main(query, url):
+    def getData(query, url):    
+       
+      openai_api_key = api_key
     
       BeautifulSoupWebReader = download_loader("BeautifulSoupWebReader")
       loader = BeautifulSoupWebReader()
@@ -164,11 +149,12 @@ def pageSupport2():
       chunk_size_limit = 600 
 
       llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="text-davinci-003", openai_api_key=openai_api_key))
+      #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=openai_api_key))      
       prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chunk_size_limit=chunk_size_limit)
-      #index = GPTSimpleVectorIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
-      index = GPTVectorStoreIndex(documents)
-      response = index.query(query, text_qa_template=QA_PROMPT)
-      #response = index.query(query,response_mode="tree_summarize")
+      index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
+      #index = GPTVectorStoreIndex(documents)
+      #response = index.query(query, text_qa_template=QA_PROMPT)
+      response = index.query(query,response_mode="default")
       return response
 
     #url_input = st.text_input("Enter a URL")
@@ -188,31 +174,18 @@ def pageSupport2():
         send_button = b.form_submit_button("Send", use_container_width=True)
 
     if load_button:
-        message('How can I help you?', is_user=False)  # Display AI's response
-
-    #if st.button("Send"):
-    #  response = main(query=user_input, url=url_input)
-    #  message(response, is_user=False)  # Display AI's response
+        message('How can I help you?', is_user=False)  # Display AI's response    
 
     #if st.button("Send"):
     if send_button:
       with st.spinner(text="Thinking..."):
-        response = main(query=user_input, url=url_input)
+        response = getData(query=user_input, url=url_input)
         response_text = str(response)  # Convert the response to a string
         message(user_input, is_user=True)
         message(response_text, is_user=False)  # Display AI's response
 
-def pagePDF():
-    #st.header("Chat PDF")
-    #st.write("Welcome to PDF!")
-
-    # Add the code here
-    #load_dotenv()
-
-    #if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
-    #    st.error("OPENAI_API_KEY is not set")
-    #    return
-
+def pagePDF( api_key ):
+    
     if api_key is None or api_key == "":
         st.error("OPENAI_API_KEY is not set")
         return
@@ -240,7 +213,8 @@ def pagePDF():
         chunks = text_splitter.split_text(text)
 
         # create embeddings
-        embeddings = OpenAIEmbeddings()
+        #embeddings = OpenAIEmbeddings()
+        embeddings = OpenAIEmbeddings(openai_api_key=api_key)
         knowledge_base = FAISS.from_texts(chunks, embeddings)
 
         # show user input
@@ -248,7 +222,7 @@ def pagePDF():
             a, b = st.columns([4, 1])
             user_question = a.text_input(
                 label="Ask a question about your PDF:",
-                placeholder="What would you like to ask about the URL content?",
+                placeholder="What would you like to ask about your PDF ?",
                 label_visibility="collapsed",
             )
             b.form_submit_button("Send", use_container_width=True)
@@ -256,33 +230,22 @@ def pagePDF():
         # show user input
         #user_question = st.text_input("Ask a question about your PDF:")
         if user_question:
-            docs = knowledge_base.similarity_search(user_question)
+            with st.spinner(text="Thinking..."):
+                docs = knowledge_base.similarity_search(user_question)
 
-            llm = OpenAI()
-            chain = load_qa_chain(llm, chain_type="stuff")
-            with get_openai_callback() as cb:
-                response = chain.run(input_documents=docs, question=user_question)
-                with st.spinner(text="Thinking..."):
+                llm = OpenAI(openai_api_key=api_key)
+                chain = load_qa_chain(llm, chain_type="stuff")
+                with get_openai_callback() as cb:
+                    response = chain.run(input_documents=docs, question=user_question)
                     #response_text = str(response)  # Convert the response to a string
                     message(user_question, is_user=True)
                     message(response, is_user=False)  # Display AI's response
-
-                #print(cb)
-
-            #st.write(response)               
+                    #print(cb)
+                #st.write(response)               
 
 
-def pageMLS():
-    #st.header("Chat MLS")
-    #st.write("Welcome to MLS!")
-
-    # Add the code here
-    #load_dotenv()
-
-    #if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
-    #    st.error("OPENAI_API_KEY is not set")
-    #    return
-
+def pageMLS( api_key ):
+    
     if api_key is None or api_key == "":
         st.error("OPENAI_API_KEY is not set")
         return
@@ -292,9 +255,18 @@ def pageMLS():
 
     csv_file = st.file_uploader("Upload a CSV file", type="csv")
     if csv_file is not None:
-        agent = create_csv_agent(OpenAI(temperature=0), csv_file, verbose=True)
+        agent = create_csv_agent(OpenAI(openai_api_key=api_key, temperature=0), csv_file, verbose=True)
 
-        user_question = st.text_input("Ask a question about your CSV: ")
+        #user_question = st.text_input("Ask a question about your CSV: ")
+        # show user input
+        with st.form("csv_input_form", clear_on_submit=True):
+            a, b = st.columns([4, 1])
+            user_question = a.text_input(
+                label="Ask a question about your MLS:",
+                placeholder="What would you like to ask about your MLS ?",
+                label_visibility="collapsed",
+            )
+            b.form_submit_button("Send", use_container_width=True)
 
         if user_question is not None and user_question != "":
             with st.spinner(text="Thinking..."):
