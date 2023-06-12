@@ -14,8 +14,10 @@ from streamlit_chat import message
 import requests
 from bs4 import BeautifulSoup
 import openai
-from pathlib import Path
-from llama_index import download_loader, GPTSimpleVectorIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper
+from pathlib import Path 
+#from llama_index import download_loader, GPTSimpleVectorIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper
+from llama_index import download_loader, GPTVectorStoreIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper
+
 
 
 
@@ -158,7 +160,7 @@ def pageSupport2():
       llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="text-davinci-003", openai_api_key=openai_api_key))
       prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chunk_size_limit=chunk_size_limit)
       #index = GPTSimpleVectorIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
-      index = GPTSimpleVectorIndex(documents)
+      index = GPTVectorStoreIndex(documents)
       response = index.query(query, text_qa_template=QA_PROMPT)
       #response = index.query(query,response_mode="tree_summarize")
       return response
