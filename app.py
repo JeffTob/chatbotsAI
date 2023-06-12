@@ -8,7 +8,7 @@ from langchain.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
 from langchain.callbacks import get_openai_callback
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 import os
 from streamlit_chat import message
 import requests
@@ -54,7 +54,7 @@ def pageSupport():
     #st.header("Chat Support")
     #st.write("Welcome to Support!")
 
-    load_dotenv()
+    #load_dotenv()
 
     if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
         st.error("OPENAI_API_KEY is not set")
@@ -124,7 +124,7 @@ def pageSupport2():
     #st.header("Chat Support LlamaIndex")
     #st.write("Welcome to Support 2!")
 
-    load_dotenv()
+    #load_dotenv()
     openai_api_key = os.getenv("OPENAI_API_KEY")
 
     st.title("💬 Chat Support (LlamaIndex)")
@@ -199,7 +199,7 @@ def pagePDF():
     #st.write("Welcome to PDF!")
 
     # Add the code here
-    load_dotenv()
+    #load_dotenv()
 
     if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
         st.error("OPENAI_API_KEY is not set")
@@ -265,7 +265,7 @@ def pageMLS():
     #st.write("Welcome to MLS!")
 
     # Add the code here
-    load_dotenv()
+    #load_dotenv()
 
     if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
         st.error("OPENAI_API_KEY is not set")
