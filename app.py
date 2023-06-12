@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
 import openai
 from pathlib import Path
 from llama_index import download_loader, GPTSimpleVectorIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper
+from langchain.agents import create_csv_agent
 
 
 def main():
