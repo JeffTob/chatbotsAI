@@ -34,7 +34,7 @@ def main():
 
     st.sidebar.title("Bradford Technologies")  # Add title to the sidebar    
     st.sidebar.text("Developed by Jeferson Tobias")  # Add title to the sidebar    
-    st.sidebar.text("version 1.0")  # Add title to the sidebar
+    st.sidebar.text("version 1.0.1")  # Add title to the sidebar
 
     if page == "Chat Support (LangChain)":
         pageSupport( openai_api_key )
@@ -145,7 +145,7 @@ def pageSupport2( api_key ):
       # set number of output tokens
       num_outputs = 2000
       # set maximum chunk overlap
-      max_chunk_overlap = 20
+      max_chunk_overlap = 0.2
       # set chunk size limit
       chunk_size_limit = 600 
 
