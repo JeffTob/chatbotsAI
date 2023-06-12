@@ -1,4 +1,5 @@
 import streamlit as st
+import langchain
 from langchain.agents import create_csv_agent
 from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
@@ -15,7 +16,7 @@ from bs4 import BeautifulSoup
 import openai
 from pathlib import Path
 from llama_index import download_loader, GPTSimpleVectorIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper
-from langchain.agents import create_csv_agent
+
 
 
 def main():
