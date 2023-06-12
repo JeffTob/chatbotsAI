@@ -18,8 +18,7 @@ from pathlib import Path
 #from llama_index import download_loader, GPTSimpleVectorIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper
 from llama_index import download_loader, GPTVectorStoreIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper
 
-
-
+api_key = ""
 
 def main():
     st.sidebar.title("Dashboard")  # Add title to the sidebar
@@ -31,7 +30,9 @@ def main():
     openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")  # Add OpenAI API Key input field
 
     if st.sidebar.button("Start"):
-        os.environ["OPENAI_API_KEY"] = openai_api_key  # Set the OpenAI API key in the environment variable
+        global api_key
+        api_key = openai_api_key
+        #os.environ["OPENAI_API_KEY"] = openai_api_key  # Set the OpenAI API key in the environment variable
 
     # Create a sidebar menu
     page = st.sidebar.selectbox("Select a page", ["Chat Support (LangChain)", "Chat Support (LlamaIndex)", "Chat PDF", "Chat MLS"])
@@ -58,7 +59,8 @@ def pageSupport():
 
     #load_dotenv()
 
-    if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
+    #if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
+    if api_key is None or api_key == "":
         st.error("OPENAI_API_KEY is not set")
         return
 
@@ -91,15 +93,15 @@ def pageSupport():
         )
         b.form_submit_button("Send", use_container_width=True)
 
-    if url_input and not os.getenv("OPENAI_API_KEY"):
+    if url_input and not api_key:
         st.info("Please add your OpenAI API key to continue.")
 
     if load_button:
             message('How can I help you?', is_user=False)  # Display AI's response
 
-    if user_input and os.getenv("OPENAI_API_KEY"):
+    if user_input and api_key:
         with st.spinner(text="Thinking..."):
-            openai.api_key = os.getenv("OPENAI_API_KEY")
+            openai.api_key = api_key
             if "content" in st.session_state:
                 st.session_state["messages"].append({"role": "user", "content": user_input})
                 filtered_messages = [msg["content"] for msg in st.session_state["messages"] if msg["role"] == "user"]
@@ -127,7 +129,11 @@ def pageSupport2():
     #st.write("Welcome to Support 2!")
 
     #load_dotenv()
-    openai_api_key = os.getenv("OPENAI_API_KEY")
+    #openai_api_key = os.getenv("OPENAI_API_KEY")
+
+    if api_key is None or api_key == "":
+        st.error("OPENAI_API_KEY is not set")
+        return
 
     st.title("💬 Chat Support (LlamaIndex)")
     st.write("Scraper - BeautifulSoup")
@@ -203,7 +209,11 @@ def pagePDF():
     # Add the code here
     #load_dotenv()
 
-    if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
+    #if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
+    #    st.error("OPENAI_API_KEY is not set")
+    #    return
+
+    if api_key is None or api_key == "":
         st.error("OPENAI_API_KEY is not set")
         return
     
@@ -269,7 +279,11 @@ def pageMLS():
     # Add the code here
     #load_dotenv()
 
-    if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
+    #if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
+    #    st.error("OPENAI_API_KEY is not set")
+    #    return
+
+    if api_key is None or api_key == "":
         st.error("OPENAI_API_KEY is not set")
         return
     
