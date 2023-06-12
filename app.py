@@ -34,6 +34,7 @@ def main():
 
     st.sidebar.title("Bradford Technologies")  # Add title to the sidebar    
     st.sidebar.text("Developed by Jeferson Tobias")  # Add title to the sidebar    
+    st.sidebar.text("version 1.0")  # Add title to the sidebar
 
     if page == "Chat Support (LangChain)":
         pageSupport( openai_api_key )
@@ -148,8 +149,8 @@ def pageSupport2( api_key ):
       # set chunk size limit
       chunk_size_limit = 600 
 
-      llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="text-davinci-003", openai_api_key=openai_api_key))
-      #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=openai_api_key))      
+      #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="text-davinci-003", openai_api_key=openai_api_key))
+      llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=openai_api_key))      
       prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chunk_size_limit=chunk_size_limit)
       index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
       #index = GPTVectorStoreIndex(documents)
@@ -254,8 +255,16 @@ def pageMLS( api_key ):
     st.write("LangChain Agent")
 
     csv_file = st.file_uploader("Upload a CSV file", type="csv")
+    #csv_path = csv_file.name
     if csv_file is not None:
-        agent = create_csv_agent(OpenAI(openai_api_key=api_key, temperature=0), csv_file, verbose=True)
+        csv_path = os.path.join(os.getcwd(), csv_file.name)  # Get the path of the uploaded CSV file
+        with open(csv_path, "wb") as f:
+            f.write(csv_file.read())  # Save the uploaded CSV file to the specified path
+        agent = create_csv_agent(OpenAI(openai_api_key=api_key, temperature=0), csv_path, verbose=True)
+        os.remove(csv_path)
+        #agent = create_csv_agent(OpenAI(openai_api_key=api_key, temperature=0), csv_file, verbose=True)        
+        #agent = create_csv_agent(OpenAI(openai_api_key=api_key, temperature=0), csv_file, verbose=True)
+        
 
         #user_question = st.text_input("Ask a question about your CSV: ")
         # show user input
