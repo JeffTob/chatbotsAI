@@ -26,7 +26,7 @@ def main():
 
     st.title("Generative AI ChatBots")
 
-    st.sidebar.text("Note: Enter your OpenAI API key to start")  # Add title to the sidebar   
+    st.sidebar.text("Enter your OpenAI API key to start")  # Add title to the sidebar   
 
     openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")  # Add OpenAI API Key input field
 
