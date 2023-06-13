@@ -8,7 +8,6 @@ from langchain.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
 from langchain.callbacks import get_openai_callback
-#from dotenv import load_dotenv
 import os
 from streamlit_chat import message
 import requests
@@ -16,32 +15,38 @@ from bs4 import BeautifulSoup
 import openai
 from pathlib import Path 
 from llama_index import download_loader, GPTVectorStoreIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper
-from llama_index import ServiceContext
+from llama_index import ServiceContext, StorageContext, load_index_from_storage
+from langchain.chat_models import ChatOpenAI
 
 
 
 def main():
-    st.sidebar.title("Dashboard Playground")  # Add title to the sidebar
+    st.sidebar.title("Dashboard AI")  # Add title to the sidebar
 
     st.title("Generative AI ChatBots")
 
-    st.sidebar.text("Enter your OpenAI API key to start")  # Add title to the sidebar   
-
-    openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")  # Add OpenAI API Key input field    
+    
+    openai_api_key = st.sidebar.text_input("Enter your OpenAI API key to start", type="password")  # Add OpenAI API Key input field    
 
     openai.api_key = openai_api_key     
 
     # Create a sidebar menu
-    page = st.sidebar.selectbox("Select a page", ["Chat Support (LangChain)", "Chat Support (LlamaIndex)", "Chat PDF", "Chat MLS"])     
+    #page = st.sidebar.selectbox("Select a page", ["Chat Support-MLS Import Wizard", "Chat Support-MLS Import Wizard", "Chat PDF", "Chat MLS"])    
+    page = st.sidebar.selectbox("Select a page", ["Chat Support", "Chat PDF", "Chat MLS"]) 
+
+    st.sidebar.text("The purpose of this Dashboard is to")
+    st.sidebar.text("learn, explore various ways on how to")
+    st.sidebar.text("use AI technology to solve various")
+    st.sidebar.text("problems also to enhance the effectiveness") 
+    st.sidebar.text("of our Products from Chatbots,")
+    st.sidebar.text("Data Visualization to Data Analysis.")  # Add title to the sidebar   
 
     st.sidebar.title("Bradford Technologies")  # Add title to the sidebar    
     st.sidebar.text("Developed by Jeferson Tobias")  # Add title to the sidebar    
-    st.sidebar.text("version 1.0.2")  # Add title to the sidebar
+    st.sidebar.text("version 1.0.4")  # Add title to the sidebar
 
-    if page == "Chat Support (LangChain)":
-        pageSupport( openai_api_key )
-    elif page == "Chat Support (LlamaIndex)":
-        pageSupport2( openai_api_key )    
+    if page == "Chat Support":
+        pageSupport2( openai_api_key )      
     elif page == "Chat PDF":
         pagePDF( openai_api_key )
     elif page == "Chat MLS":
@@ -121,17 +126,43 @@ def pageSupport2( api_key ):
         st.error("OPENAI_API_KEY is not set")
         return
 
-    st.title("💬 Chat Support (LlamaIndex)")
-    st.write("Scraper - BeautifulSoup")
+    st.title("💬 Chat - MLS Import Wizard")
+    st.write("Using: Web Scraper - BeautifulSoup,  LlamaIndex VectorStoreIndex documents, OpeanAI-GPT-3.5-turbo")
+        
+    def createDataSet(url):
+        print(url)
+        openai_api_key = api_key
 
-    def getData(query, url):    
-       
-      openai_api_key = api_key
-    
+        BeautifulSoupWebReader = download_loader("BeautifulSoupWebReader")
+        loader = BeautifulSoupWebReader()
+        documents = loader.load_data(urls=[url])
+        # set maximum input size
+        max_input_size = 4096
+        # set number of output tokens
+        num_outputs = 2000
+        # set maximum chunk overlap
+        max_chunk_overlap = 0.2
+        # set chunk size limit
+        chunk_size_limit = 600 
+
+        os.environ["OPENAI_API_KEY"] = openai_api_key      
+        #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=openai_api_key))   
+        llm_predictor = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=openai_api_key))     
+        prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chunk_size_limit=chunk_size_limit) 
+        serviceContext = ServiceContext.from_defaults(llm_predictor=llm_predictor, prompt_helper=prompt_helper)
+        index_page = GPTVectorStoreIndex.from_documents(documents, serviceContext=serviceContext)  
+        index_page.storage_context.persist(persist_dir="data")
+        return index_page
+
+    #def getData(query, url):    
+    def getData(query):
+         
+      #openai_api_key = api_key
+      '''
       BeautifulSoupWebReader = download_loader("BeautifulSoupWebReader")
       loader = BeautifulSoupWebReader()
       documents = loader.load_data(urls=[url])
-        
+      '''  
       QA_PROMPT_TMPL = (
             "We have provided context information below.\n"
             "---------------------\n"
@@ -141,42 +172,20 @@ def pageSupport2( api_key ):
             "warn the user if any information seems off: {query_str}\n"
         )
       QA_PROMPT = QuestionAnswerPrompt(QA_PROMPT_TMPL)
-
-      # set maximum input size
-      max_input_size = 4096
-      # set number of output tokens
-      num_outputs = 2000
-      # set maximum chunk overlap
-      max_chunk_overlap = 0.2
-      # set chunk size limit
-      chunk_size_limit = 600 
-
-      os.environ["OPENAI_API_KEY"] = openai_api_key
-
-      #openai.api_key = openai_api_key
-      #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="text-davinci-003", openai_api_key=openai_api_key))
-      llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=openai_api_key))      
-      prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chunk_size_limit=chunk_size_limit)
-      #index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
-      #index = GPTSimpleVectorIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper) 
-
-      serviceContext = ServiceContext.from_defaults(llm_predictor=llm_predictor, prompt_helper=prompt_helper)
-      index = GPTVectorStoreIndex.from_documents(documents, serviceContext=serviceContext)
       
-      
-      #index = GPTVectorStoreIndex(documents)
       #response = index.query(query, text_qa_template=QA_PROMPT)
       #response = index.query(query,response_mode="default")
+      storage_context = StorageContext.from_defaults(persist_dir="data")
+      index = load_index_from_storage(storage_context)
       query_engine = index.as_query_engine()
       response = query_engine.query(query)
       return response
 
     #url_input = st.text_input("Enter a URL")
+    default_url = "https://support.bradfordsoftware.com/techtips/cf-mls-import-wizard.html"
     with st.form("url_input_form"):
-      url_input = st.text_input("Enter URL:", help="Enter the URL of a web page")
+      url_input = st.text_input("Enter URL:", value=default_url, help="Enter the URL of a web page")
       load_button = st.form_submit_button("Load Data")    
-
-    #user_input = st.text_input("Ask a question about the webpage")
 
     with st.form("chat_input", clear_on_submit=True):
         a, b = st.columns([4, 1])
@@ -188,12 +197,14 @@ def pageSupport2( api_key ):
         send_button = b.form_submit_button("Send", use_container_width=True)
 
     if load_button:
-        message('How can I help you?', is_user=False)  # Display AI's response    
+        createDataSet(url_input)
+        message('How can I help you ?', is_user=False)  # Display AI's response    
 
     #if st.button("Send"):
     if send_button:
       with st.spinner(text="Thinking..."):
-        response = getData(query=user_input, url=url_input)
+        #response = getData(query=user_input, url=url_input)
+        response = getData(query=user_input)
         response_text = str(response)  # Convert the response to a string
         message(user_input, is_user=True)
         message(response_text, is_user=False)  # Display AI's response
