@@ -34,7 +34,7 @@ def main():
 
     st.sidebar.title("Bradford Technologies")  # Add title to the sidebar    
     st.sidebar.text("Developed by Jeferson Tobias")  # Add title to the sidebar    
-    st.sidebar.text("version 1.0.1")  # Add title to the sidebar
+    st.sidebar.text("version 1.0.2")  # Add title to the sidebar
 
     if page == "Chat Support (LangChain)":
         pageSupport( openai_api_key )
@@ -148,11 +148,11 @@ def pageSupport2( api_key ):
       max_chunk_overlap = 0.2
       # set chunk size limit
       chunk_size_limit = 600 
-
+      openai.api_key = openai_api_key
       #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="text-davinci-003", openai_api_key=openai_api_key))
       llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=openai_api_key))      
       prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chunk_size_limit=chunk_size_limit)
-      index = GPTVectorStoreIndex.from_documents(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
+      index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
       
       #index = GPTVectorStoreIndex(documents)
       #response = index.query(query, text_qa_template=QA_PROMPT)
