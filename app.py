@@ -15,8 +15,9 @@ import requests
 from bs4 import BeautifulSoup
 import openai
 from pathlib import Path 
-#from llama_index import download_loader, GPTSimpleVectorIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper
-from llama_index import download_loader, GPTVectorStoreIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper, GPTSimpleVectorIndex
+from llama_index import download_loader, GPTVectorStoreIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper
+from llama_index import ServiceContext
+
 
 
 def main():
@@ -146,15 +147,21 @@ def pageSupport2( api_key ):
       # set number of output tokens
       num_outputs = 2000
       # set maximum chunk overlap
-      max_chunk_overlap = 20
+      max_chunk_overlap = 0.2
       # set chunk size limit
       chunk_size_limit = 600 
-      #openai.api_key = openai_api_key
+
+      
+
+      openai.api_key = openai_api_key
       #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="text-davinci-003", openai_api_key=openai_api_key))
       llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=openai_api_key))      
       prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chunk_size_limit=chunk_size_limit)
       #index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
-      index = GPTSimpleVectorIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper) 
+      #index = GPTSimpleVectorIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper) 
+
+      serviceContext = ServiceContext.from_defaults(llm_predictor=llm_predictor, prompt_helper=prompt_helper)
+      index = GPTVectorStoreIndex.from_documents(documents, serviceContext=serviceContext)
       
       
       #index = GPTVectorStoreIndex(documents)
