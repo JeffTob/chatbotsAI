@@ -151,9 +151,9 @@ def pageSupport2( api_key ):
       # set chunk size limit
       chunk_size_limit = 600 
 
-      
+      os.environ["OPENAI_API_KEY"] = openai_api_key
 
-      openai.api_key = openai_api_key
+      #openai.api_key = openai_api_key
       #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="text-davinci-003", openai_api_key=openai_api_key))
       llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=openai_api_key))      
       prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chunk_size_limit=chunk_size_limit)
@@ -166,7 +166,9 @@ def pageSupport2( api_key ):
       
       #index = GPTVectorStoreIndex(documents)
       #response = index.query(query, text_qa_template=QA_PROMPT)
-      response = index.query(query,response_mode="default")
+      #response = index.query(query,response_mode="default")
+      query_engine = index.as_query_engine()
+      response = query_engine.query(query)
       return response
 
     #url_input = st.text_input("Enter a URL")
