@@ -17,13 +17,16 @@ from pathlib import Path
 from llama_index import download_loader, GPTVectorStoreIndex, LLMPredictor, QuestionAnswerPrompt, PromptHelper
 from llama_index import ServiceContext, StorageContext, load_index_from_storage
 from langchain.chat_models import ChatOpenAI
-
+import pandas as pd
+from data_analyzer import DataAnalyzer
+from dashboard import Dashboard
 
 
 def main():
     st.sidebar.title("Dashboard AI")  # Add title to the sidebar
 
-    st.title("Generative AI Application")
+    st.title("Chat With Your Data")
+    st.text("*Interact with your data like a Human*")
     
     openai_api_key = st.sidebar.text_input("Enter your OpenAI API key to start", type="password")  # Add OpenAI API Key input field    
 
@@ -31,7 +34,7 @@ def main():
 
     # Create a sidebar menu
     #page = st.sidebar.selectbox("Select a page", ["Chat Support-MLS Import Wizard", "Chat Support-MLS Import Wizard", "Chat PDF", "Chat MLS"])    
-    page = st.sidebar.selectbox("Select a page", ["Chat Support", "Chat PDF", "Chat MLS"]) 
+    page = st.sidebar.selectbox("Select a page", ["Chat Support", "Chat PDF", "Chat Website", "Chat MLS", "MLS Analysis"]) 
 
     with st.sidebar:
         st.markdown(
@@ -43,7 +46,7 @@ def main():
 
     st.sidebar.title("Bradford Technologies")  # Add title to the sidebar    
     st.sidebar.text("Developed by Jeferson Tobias")  # Add title to the sidebar    
-    st.sidebar.text("version 1.0.4")  # Add title to the sidebar
+    st.sidebar.text("version 1.0.5")  # Add title to the sidebar
 
     if page == "Chat Support":
         pageSupport2( openai_api_key )      
@@ -51,24 +54,28 @@ def main():
         pagePDF( openai_api_key )
     elif page == "Chat MLS":
         pageMLS( openai_api_key )
+    elif page == "Chat Website":
+        pageWebsite( openai_api_key ) 
+    elif page == "MLS Analysis":
+        pageMLSAnalysis( openai_api_key )        
 
 
-def pageSupport( api_key ):
+def pageWebsite( api_key ):
     
     #if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
     if api_key is None or api_key == "":
         st.error("OPENAI_API_KEY is not set")
         return
 
-    st.title("💬 Chat Support (LangChain)")
-    st.write("Scraper - BeautifulSoup")
+    st.title("💬 Chat Website")
+    st.write("Web Scraper")
 
     if "messages" not in st.session_state:
         st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
 
     with st.form("url_input_form"):
-        url_input = st.text_input("Enter URL:", help="Enter the URL of a web page")
-        load_button = st.form_submit_button("Load Data")
+        url_input = st.text_input("Enter URL:", help="Enter the URL of the website you want to scrape.")
+        load_button = st.form_submit_button("Fetch Link")
 
     if load_button:
         if url_input:
@@ -274,8 +281,10 @@ def pageMLS( api_key ):
             st.error("OPENAI_API_KEY is not set")
             return
         
+         
+
         st.title("💬 Chat MLS ")
-        st.write("LangChain Agent")
+        st.write("LangChain Agent")        
 
         csv_file = st.file_uploader("Upload a CSV file", type="csv")
         #csv_path = csv_file.name
@@ -311,6 +320,30 @@ def pageMLS( api_key ):
                     #st.write(completion)
     except Exception as e:
         st.error(f"An error occurred: {e}")
+
+def pageMLSAnalysis( api_key ):
+    try:
+        if api_key is None or api_key == "":
+            st.error("OPENAI_API_KEY is not set")
+            return       
+         
+        st.title("💬 MLS Data Analysis")
+        st.sidebar.title("Menu")
+
+        def upload_csv():
+            uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+            if uploaded_file is not None:
+                return pd.read_csv(uploaded_file)
+            
+        df = upload_csv()
+        if df is not None:
+            # Analyze data and generate dashboard
+            data_analyzer = DataAnalyzer(df)
+            dashboard = Dashboard(data_analyzer)
+            dashboard.generate()
+        
+    except Exception as e:
+        st.error(f"An error occurred: {e}")    
 
 if __name__ == "__main__":
     main()
